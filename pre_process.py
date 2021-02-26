@@ -2,13 +2,18 @@ import pandas as pd
 import json
 import codecs
 import os
+import re
+import random
 
-baseURL = './xuetong_test'
+baseURL = './xuetong'  # ./xuetong_test
 base = os.listdir(baseURL)
-output_file = codecs.open('./xuetong_test/Label.txt', 'w', encoding='utf-8')
+train_label = codecs.open('train_label.txt', 'w', encoding='utf-8')
+test_label = codecs.open('test_label.txt', 'w', encoding='utf-8')
+count = 600
 
-for file in base:
-    if file.find('.json') > -1:
+for i, file in enumerate(base):
+    if not re.search('\._.*\.json', file) and file.find('.json') > -1:
+        # print(i, file)
         img = file.split('.json')[0]
         f = open(os.path.join(baseURL, file))
         content = f.read()
@@ -24,4 +29,13 @@ for file in base:
                        "difficult": False}
                 tags.append(tmp)
 
-        output_file.write('xuetong_test/'   + img + '.jpg\t' + json.dumps(tags) + '\n')
+        if random.random() >= 0.1:
+            count -= 1
+            os.system('mv xuetong/' + img + '.jpg' + ' train_imgs/')
+            train_label.write('train_imgs/'   + img + '.jpg\t' + json.dumps(tags) + '\n')
+        else:
+            os.system('mv xuetong/' + img + '.jpg' + ' test_imgs/')
+            test_label.write('test_imgs/' + img + '.jpg\t' + json.dumps(tags) + '\n')
+
+        if count < 0:
+            break
